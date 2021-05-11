@@ -1,220 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat INE</title> 
+    <style>
+        html, body {
+            height: 100%;
+        }
 
-const host     =  'database-prep-desarrollo-alexa.cstdceb0lngz.us-east-2.rds.amazonaws.com';
-const user     =  'admin';
-const password =  'adminalexamysql';
-const port     =  '3306';
-const database =  'PREP';
-const dialect  =  'mysql';
+        body {
+            margin: 0;
+        }
 
-const Sequelize = require('sequelize')
+        h1 {
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            line-height: 20px;
+            color: #FFFFFF;
+            display: table-cell;
+            padding: 13px 0px 0px 10px;
+        }
 
-const sequelize = new Sequelize(database, user, password, {
-  host: host,
-  port: port,
-  dialect: dialect,
-  define: {
-      freezeTableName: true,
-  },
-  pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-  },
-  // <http://docs.sequelizejs.com/manual/tutorial/querying.html#operators>
-  operatorsAliases: false,
-})
+        h1imagen {
+            display: table-cell;
+        }
 
-sequelize
-  .authenticate()
-  .then(function(err) {
-    console.log('Conección a la base de datos correctamente.');
-  })
-  .catch(function (err) {
-    console.log('Hubo un erroral conectarse a la base de datos', err);
-  });
+        img.centertext{
+            vertical-align: middle;
+            padding: 0px 0px 0px 10px;
+        }
 
+        button.webchat__suggested-action__button{
+            border-color: #b7006d;
+        }
 
-    
+        #heading {
+            background-color: #b7006d;
+            height: 50px;
+        }
 
-const fetch = require("node-fetch");
-const { ApolloServer, gql } = require('apollo-server');
+        .main {
+            margin: 18px;
+            border-radius: 4px;
+        }
 
-const typeDefs = gql`
+        div[role="form"]{
+            background-color: #F8F8F8;      
+        }
 
-  type libro {
-    title: String
-    author: String
-  }
-  
-  enum personajeEstatus {
-    Alive
-    Dead
-    unknown
-  } 
-  type personaje {
-    name: String
-    id: ID
-    status: personajeEstatus
-    episodios : [String]
-  }
-
-  type candidato {
-    name: String
-    id: ID
-  }
-  
-  #type candidatoBD {
-  #  ID_CANDIDATO : ID! 
-  #  ID_ESCENARIO = String
-  #  NOMBRE_PROPIETARIO = String
-  #  NOMBRE_SUPLENTE = String
-  #}
-
-  type Query {
-    libros: [libro]
-    personajes : [personaje]
-    candidatos : [candidato]
-    #candidatosBD : [candidatoBD]
-    #candidatoBD(id: ID!): candidatoBD
-  }
-`;
+        #webchat {
+            position: fixed;
+            height: calc(100% - 60px);
+            width: 100%;
+            top: 58px;
+            overflow: hidden;
+        }
 
 
-const resolvers = {
-  Query: {
-    libros: () => libros,
-    personajes: () => personajes,
-    candidatos: () => candidatos
-//    candidatosBD: () => db.C_CANDIDATOS.findAll(),
-//    candidatoBD: async (obj, args, context, info) =>
-//      db.C_CANDIDATOS.findByPK(args.id)
-  }
-};
+    </style>
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  playground: {
-    endpoint: "/dev/graphql"
-  }
-});
+</head>
+<body>
+    <div>
+        <div id="heading">            
+            <!-- Change the h1 text to change the bot name-->   
+            <h1imagen><img class="centertext" src="img/iconoChatEDPT.jpg"></h1imagen>
+            <h1>CAEbot </h1>
+        </div>
+        <div id="webchat" role="main"></div>
+    </div>
+ 
 
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+  <script src="https://cdn.botframework.com/botframework-webchat/master/webchat.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+	
+  <script>
 
-// Esta es una colección de libros que podremos consultar
-// el servidor GraphQL para. Un ejemplo más completo podría recuperar
-// de una fuente de datos existente como una API REST o una base de datos.
-const libros = [
-  {
-    title: "Harry Potter and the Chamber of Secrets",
-    author: "J.K. Rowling"
-  },
-  {
-    title: "Jurassic Park",
-    author: "Michael Crichton"
-  },
-  {
-    title: "Titulo prueba",
-    author: "Autor prueba"
-  }
-];
+        const styleSet = window.WebChat.createStyleSet({    
+            
+            //Bot            
+            botAvatarImage: 'https://raw.githubusercontent.com/AmbarAguilar/Chatbot-CAE/master/img/botEDPT.png',
+			botAvatarInitials: 'Bot',
+            botAvatarBackgroundColor: '#b7006d',
+			bubbleBackground: '#fcecf4',
+			bubbleBorderColor: '#f9ddee',
+			bubbleBorderRadius: '5',
+			
+			//Usuario
+            userAvatarImage: 'https://raw.githubusercontent.com/AmbarAguilar/Chatbot-CAE/master/img/userEDPT.png',
+            userAvatarInitials: 'Yo',
+            userAvatarBackgroundColor: '#333333',
+            bubbleFromUserBackground: '#f1f1f2',
+			bubbleFromUserBorderColor: '#dddddd',
+			bubbleFromUserBorderRadius: '5',
 
-// datos simulados para personajes
-const personajes = [
-  {
-    name: "Rick Sanchez",
-    id: 1,
-    status: "Alive",
-    episodios: [
-      "https://rickandmortyapi.com/api/episode/1",
-      "https://rickandmortyapi.com/api/episode/2"
-    ]
-  },
-  {
-    name: "Morty Smith",
-    id: 2,
-    status: "Alive",
-    episodios: [
-      "https://rickandmortyapi.com/api/episode/1",
-      "https://rickandmortyapi.com/api/episode/3"
-    ]
-  }
-];
+            // Sugerencias de acciones
+			suggestedActionBackground: '#FFFFFF',
+			suggestedActionTextColor: '#d70f87',
+			suggestedActionBorder: 'solid 2px #d70f87',
+			suggestedActionBorderRadius: '5',
+			suggestedActionHeight: '40',
+			
+			//Botones de transcripción
+			transcriptOverlayButtonBackground: '#666666',	
+			hideUploadButton: true,
 
-// datos simulados para episodios
-const episodios = [
-  {
-    name: "Pilot",
-    id: 1
-  },
-  {
-    name: "Lawnmower Dog",
-    id: 2
-  }
-];
+			//Características de la conversación
+			timestampColor: '#999999',
+			
+			//Caja de mensaje
+			sendBoxBorderLeft: 'solid 3px #E6E6E6',
+			sendBoxBorderRight: 'solid 3px #E6E6E6',
+			sendBoxBorderTop: 'solid 3px #E6E6E6',
+			sendBoxBorderBottom: 'solid 3px #E6E6E6',
+			locale: 'es-ES'
 
-// datos simulados para candidatos
-const candidatos = [
-  {
-    name:"Candidato 1",
-    id: 1
-  },
-  {
-    name: "Candidato 2",
-    id: 2
-  },
-  {
-    name: "Candidato 3",
-    id: 3
-  }
-];
+         });
 
+         
 
+        // Add your BOT ID below 
+        var BOT_ID = "962f695d-d8c6-448b-910d-e25a13f15d0b"; 
+        var theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
 
-
-
-
-//---------Funciones------------
-
-function fetchEpisodes() {
-  // More info about the fetch function? https://github.com/bitinn/node-fetch#json
-  return fetch("https://rickandmortyapi.com/api/episode/")
-    .then(res => res.json())
-    .then(json => json.results);
-}
-
-function fetchEpisodeById(id) {
-  return fetch("https://rickandmortyapi.com/api/episode/" + id)
-    .then(res => res.json())
-    .then(json => json);
-}
-
-function fetchEpisodeByUrl(url) {
-  return fetch(url)
-    .then(res => res.json())
-    .then(json => json);
-}
-
-function fetchCharacters() {
-  // More info about the fetch function? https://github.com/bitinn/node-fetch#json
-  return fetch("https://rickandmortyapi.com/api/character/")
-    .then(res => res.json())
-    .then(json => json.results);
-}
-
-function fetchCharacterById(id) {
-  // More info about the fetch function? https://github.com/bitinn/node-fetch#json
-  return fetch("https://rickandmortyapi.com/api/character/" + id)
-    .then(res => res.json())
-    .then(json => json);
-}
-
-function fetchCharacterByUrl(url) {
-  // More info about the fetch function? https://github.com/bitinn/node-fetch#json
-  return fetch(url)
-    .then(res => res.json())
-    .then(json => json);
-}
+      fetch(theURL)
+            .then(response => response.json())
+            .then(conversationInfo => {
+                window.WebChat.renderWebChat( {
+			overrideLocalizedStrings: {
+				TEXT_INPUT_PLACEHOLDER: 'Escribe "Hola" para iniciar la conversaci\u00F3n'
+			},			 
+                        directLine: window.WebChat.createDirectLine({
+                            token: conversationInfo.token,
+                        }),
+                        styleSet                         						
+                    },
+                    document.getElementById('webchat')					
+                );
+            })
+            .catch(err => console.error("Ha ocurrido un problema: " + err))
+	    .then(()=>{
+			setTimeout(()=>{
+				$("input[type='text']").keydown(function(e){
+					if(e.keyCode == 13)
+					{
+						setTimeout(function(){
+							$("p:contains('Sorry'):contains(','):contains('I'):contains('didn'):contains('understand')").text("Lo siento, no pude entender tu respuesta."); 
+						},1500);
+					}
+				});
+			},1000);
+		});
+    </script>
+  </body>
+</html>
